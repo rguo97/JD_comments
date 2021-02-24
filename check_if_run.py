@@ -18,4 +18,3 @@ while True:
     else:
         Send_Mail().send_error_mail()
         break
-
