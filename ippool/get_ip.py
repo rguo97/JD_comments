@@ -1,5 +1,5 @@
 from .ip import IpPool
-import time
+from common.time_type import get_time
 from common.log import print_log
 from common.get_sql import get_insert_sql_ip,get_update_sql_ip
 from common.event import Event
@@ -11,7 +11,6 @@ class Get_Ip(IpPool):
         super().__init__(database)
 
     def insert_data(self):
-        self.stats_dict["get_ip"][0] += 1
 
         if self.row_number < 109:
             print_log("info", "Get ip start")
@@ -21,9 +20,11 @@ class Get_Ip(IpPool):
                 result["id"] = i + self.row_number
                 result["ip"] = ip_list[i]["ip"]
                 result["port"] = ip_list[i]["port"]
-                result["update_time"] = int(time.time())
+                result["time"] = get_time()
                 result["status"] = 1
+                result["level"] = "高匿"
                 sql = get_insert_sql_ip(result)
+                
                 try:
                     self.cursor.execute(sql)
                     self.database_use.commit()
@@ -48,8 +49,9 @@ class Get_Ip(IpPool):
                         result["id"] = row[4]
                         result["ip"] = ip["ip"]
                         result["port"] = ip["port"]
-                        result["update_time"] = int(time.time())
+                        result["time"] = get_time()
                         result["status"] = 1
+                        result["level"] = "高匿"
 
                         sql = get_update_sql_ip(result)
                         try:
@@ -68,7 +70,4 @@ class Get_Ip(IpPool):
         self.insert_data()
         self.close_database()
 
-class Get_Ip_Event(Event):
-    def __init__(self, name, class_event):
-        super().__init__(name, class_event)
 
