@@ -17,6 +17,7 @@ class IpPool(Database):
     def get_data(self):
         proxies=random_ip(self.select_all_date())
         try:
+            self.stats_dict["get_ip"][0]+=1
             url = "https://ip.ihuan.me/"
             page = requests.get(url, headers=Http_Head.headers,proxies=random.choice(proxies))
             soup = BeautifulSoup(page.text, "html.parser")
@@ -33,14 +34,15 @@ class IpPool(Database):
             except Exception as e:
                 print_log("error", "https://www.kuaidaili.com/free can not reach")
         finally:
-            try:     
+            try:
                 ip_list = []
                 for soup in soups:
-                    ip_dict = {}
-                    ip_dict["ip"] = soup.find_all("td")[0].text
-                    ip_dict["port"] = soup.find_all("td")[1].text
-                    ip_list.append(ip_dict)
-                    self.stats_dict["get_ip"][1]+=1
+                    if soup.find_all("td")[6].text=="高匿" or soup.find_all("td")[2].text=="高匿名":
+                        ip_dict = {}
+                        ip_dict["ip"] = soup.find_all("td")[0].text
+                        ip_dict["port"] = soup.find_all("td")[1].text
+                        ip_list.append(ip_dict)
+                        self.stats_dict["get_ip"][1]+=1
                 return ip_list
             except Exception as e:
                 print_log("error", "get ip failed, because %s" % str(e))
@@ -56,7 +58,3 @@ class IpPool(Database):
         rows = self.cursor.fetchall()
         self.close_file("get_ip_stats.txt")
         return rows
-
-
-
-
